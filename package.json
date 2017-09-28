@@ -1,0 +1,29 @@
+{
+  "name": "redux-ext",
+  "version": "1.0.2",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepublish": "node_modules\\.bin\\babel src --out-dir lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anissoft/redux-ext"
+  },
+  "author": "Alexey Anisimov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Anissoft/redux-ext/issues"
+  },
+  "homepage": "https://github.com/Anissoft/redux-ext",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.22.1",
+    "babel-plugin-transform-async-to-generator": "^6.22.0",
+    "babel-polyfill": "^6.22.0",
+    "babel-preset-es2015": "^6.3.13"
+  },
+  "dependencies": {
+    "babel": "^6.23.0"
+  }
+}
