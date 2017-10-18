@@ -5,7 +5,7 @@ let _crossbrowserName = '',
 	_crossbrowser = {};
 
 if (typeof crossbrowser === 'undefined') {
-	let _crossbrowser = {};
+	_crossbrowser = {};
 } else {
 	_crossbrowser = crossbrowser;
 }

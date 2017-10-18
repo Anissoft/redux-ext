@@ -24,7 +24,7 @@ class MainStore {
 						dispatchResponder(action, sendResponse);
 						break;
 					case  (request._type === STATE):
-						sendResponse(JSON.stringify(this.store.getState()));
+						sendResponse(this.store.getState());
 						break;
 					default:
 						break;

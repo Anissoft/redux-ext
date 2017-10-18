@@ -38,11 +38,11 @@ class ProxyStore {
 	}
 
 	getState() {
-		return this.state;
+		return Object.assign({}, this.state);
 	}
 
 	subscribe(observer) {
-		let id = Object.keys(this.observers);
+		let id = Object.keys(this.observers).length;
 
 		this.observers[id] = observer;
 
@@ -56,9 +56,9 @@ class ProxyStore {
 			webextApi.runtime.sendMessage({
 				_type: STATE,
 				_name: this.name,
-			}, (stateString) => {
+			}, (state) => {
 				try {
-					this.state = stateString;
+					this.state = state;
 				} catch (e) {
 					reject(e);
 				}
