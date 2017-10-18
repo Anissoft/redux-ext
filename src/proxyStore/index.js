@@ -1,6 +1,7 @@
-import {DISPATCH, STATE, webextApi} from './../constants/index.js';
+import {DISPATCH, STATE, webextApi, isPopup} from './../constants/index.js';
+import {crossbrowserName} from "../constants/index";
 
-class ProxyStore {
+class ContentProxyStore {
 	constructor(name) {
 		this.name = name;
 		this.state = {};
@@ -67,5 +68,39 @@ class ProxyStore {
 		})
 	}
 }
+
+class PopupProxyStore {
+	constructor(name) {
+		this.name = name;
+	}
+
+	ready() {
+		return new Promise((resolve, reject) => {
+			let proceed = (win, _resolve, _reject) => {
+				let store = !!win && win['__' + this.name];
+				if (store) {
+					this.dispatch = store.dispatch;
+					this.getState = store.getState;
+					this.subscribe = store.subscribe;
+					_resolve();
+				} else {
+					_reject()
+				}
+			};
+			if (webextApi.extension.getBackgroundPage) {
+				let win = webextApi.extension.getBackgroundPage();
+				proceed(win, resolve, reject);
+			} else if (webextApi.browser.getBackgroundWindow) {
+				webextApi.browser.getBackgroundWindow((win) => {
+					proceed(win, resolve, reject)
+				});
+			} else {
+				reject()
+			}
+		})
+	}
+}
+
+let ProxyStore = isPopup && crossbrowserName === 'safari' ? PopupProxyStore : ContentProxyStore;
 
 export default ProxyStore;

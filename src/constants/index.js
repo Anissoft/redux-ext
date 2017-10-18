@@ -35,6 +35,7 @@ if (navigator.userAgent.indexOf("Chrome") != -1) {//CHROME, EDGE OR OPERA
 } else {
 	console.error("Cannot get browser name");
 }
-
+let manifest = _crossbrowser.runtime.getManifest();
+export const isPopup = manifest && manifest.browser_action && window.location.href.indexOf(manifest.browser_action.default_popup) !== -1;
 export const webextApi = _crossbrowser;
 export const crossbrowserName = _crossbrowserName;

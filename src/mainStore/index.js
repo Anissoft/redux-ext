@@ -1,4 +1,4 @@
-import {DISPATCH, STATE, webextApi} from './../constants/index.js';
+import {DISPATCH, STATE, webextApi,crossbrowserName} from './../constants/index.js';
 
 const dispatchResponder = (action, send) => {
 	return true;
@@ -42,8 +42,14 @@ class MainStore {
 					})
 				}
 			});
+			webextApi.runtime.sendMessage({
+				_type: STATE,
+				_name: this.name,
+				_data: this.store.getState()
+			});
+		});
 
-		})
+		crossbrowserName === 'safari' && window && (window['__' + name] = this);
 	}
 
 	dispatch(action) {
