@@ -7,7 +7,7 @@ This simple package allow you to use Redux store all across the webextension.
 
 ```javascript
 import {compose, applyMiddleware, createStore} from 'redux';
-import MainStore from 'redux-ext';
+import {MainStore} from 'redux-ext';
 import {reducers} from './reducers.js';
 import {defaultState} from './defaultState.js';
  
@@ -21,9 +21,9 @@ store.dispatch(/*...*/);
 ### In content or popup:
 
 ```javascript
-import ProxyStore from 'redux-ext';
+import {ProxyStore} from 'redux-ext';
  
-let _store = new ProxyStore('myname');
+let store = new ProxyStore('myname');
  
 store.ready().then(() => {
     /*your code*/

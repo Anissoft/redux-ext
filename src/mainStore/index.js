@@ -49,7 +49,7 @@ class MainStore {
 			});
 		});
 
-		crossbrowserName === 'safari' && window && (window['__' + name] = this);
+		crossbrowserName === 'safari' && (window['__' + name] = this);
 	}
 
 	dispatch(action) {
