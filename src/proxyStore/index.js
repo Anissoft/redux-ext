@@ -1,19 +1,18 @@
-import {DISPATCH, STATE, webextApi, isPopup} from './../constants/index.js';
-import {crossbrowserName} from "../constants/index";
+// @flow
+import { DISPATCH, STATE, webextApi, isPopup, browserName } from '../constants';
 
 class ContentProxyStore {
-	constructor(name) {
+	name: string;
+	state: Object;
+	observers: Object;
+
+	constructor( name: string ) {
 		this.name = name;
 		this.state = {};
 		this.observers = {};
 
-		this.subscribe = this.subscribe.bind(this);
-		this.dispatch = this.dispatch.bind(this);
-		this.getState = this.getState.bind(this);
-		this.ready = this.ready.bind(this);
-
-		webextApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
-			if (request && request._type && (request._type === STATE) && request._name && (request._name === this.name)) {
+		webextApi.runtime.onMessage.addListener(( request: Object, sender: Object, sendResponse: Function ) => {
+			if (request && request._type && (request._type === STATE) && request._name && (request._name === this.name) && request._data) {
 				this.state = request._data;
 				for (let id in this.observers) {
 					typeof this.observers[id] === 'function' && this.observers[id]();
@@ -22,7 +21,7 @@ class ContentProxyStore {
 		});
 	}
 
-	dispatch(action) {
+	dispatch = ( action: Object | Function ) => {
 		switch (typeof action) {
 			case ('object'):
 				webextApi.runtime.sendMessage({
@@ -31,69 +30,72 @@ class ContentProxyStore {
 					_data: action
 				});
 				return action;
-				break;
 			case ('function'):
 				action(this.dispatch, this.getState);
 				break;
 		}
-	}
+	};
 
-	getState() {
+	getState = (): Object => {
 		return Object.assign({}, this.state);
-	}
+	};
 
-	subscribe(observer) {
+	subscribe = ( observer: Function ) => {
 		let id = Object.keys(this.observers).length;
 
 		this.observers[id] = observer;
 
 		return (() => {
 			delete this.observers[id];
-		}).bind(this);
-	}
+		});
+	};
 
-	ready() {
-		return new Promise((resolve, reject) => {
+	ready(): Promise<any> {
+		return new Promise(( resolve: Function, reject: Function ) => {
 			webextApi.runtime.sendMessage({
 				_type: STATE,
 				_name: this.name,
-			}, (state) => {
+				_data: false
+			}, ( state: Object ) => {
 				try {
 					this.state = state;
 				} catch (e) {
 					reject(e);
 				}
-				resolve()
+				resolve(this)
 			});
 		})
 	}
 }
 
 class PopupProxyStore {
-	constructor(name) {
+	name: string;
+	dispatch: Function;
+	getState: Function;
+	subscribe: Function;
+
+	constructor( name: string ) {
 		this.name = name;
 	}
 
 	ready() {
-		return new Promise((resolve, reject) => {
-			let proceed = (win, _resolve, _reject) => {
+		return new Promise(( resolve: Function, reject: Function ) => {
+			let proceed = ( win: Object ) => {
 				let store = !!win && win['__' + this.name];
 				if (store) {
-					this.dispatch = store.dispatch;
-					this.getState = store.getState;
-					this.subscribe = store.subscribe;
-					_resolve();
+					let { dispatch, getState, subscribe } = store;
+					this.dispatch = dispatch.bind(this);
+					this.getState = getState.bind(this);
+					this.subscribe = subscribe.bind(this);
+					resolve(store);
 				} else {
-					_reject()
+					reject()
 				}
 			};
 			if (webextApi.extension.getBackgroundPage) {
-				let win = webextApi.extension.getBackgroundPage();
-				proceed(win, resolve, reject);
+				proceed(webextApi.extension.getBackgroundPage());
 			} else if (webextApi.browser.getBackgroundWindow) {
-				webextApi.browser.getBackgroundWindow((win) => {
-					proceed(win, resolve, reject)
-				});
+				webextApi.browser.getBackgroundWindow(proceed);
 			} else {
 				reject()
 			}
@@ -101,6 +103,4 @@ class PopupProxyStore {
 	}
 }
 
-let ProxyStore = isPopup && crossbrowserName === 'safari' ? PopupProxyStore : ContentProxyStore;
-
-export default ProxyStore;
+export default (isPopup && browserName === 'safari') ? PopupProxyStore : ContentProxyStore;

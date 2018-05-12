@@ -1,27 +1,26 @@
-import {DISPATCH, STATE, webextApi,crossbrowserName} from './../constants/index.js';
+// @flow
+import {DISPATCH, STATE, webextApi, browserName} from '../constants';
 
-const dispatchResponder = (action, send) => {
-	return true;
-};
+// const dispatchResponder = (action, send) => {
+// 	return true;
+// };
 
 class MainStore {
-	constructor(store, name) {
+	store: Object;
+	name: string;
+
+	constructor(store: Object, name: string) {
 		this.store = store;
 		this.name = name;
 
-		this.subscribe = this.subscribe.bind(this);
-		this.dispatch = this.dispatch.bind(this);
-		this.getState = this.getState.bind(this);
-		this.replaceReducer = this.replaceReducer.bind(this);
-
-		webextApi.runtime.onMessage.addListener((request, sender, sendResponse) => {
+		webextApi.runtime.onMessage.addListener((request: Object, sender: Object, sendResponse: Function) => {
 			if (request && request._type && request._name && (request._name === this.name)) {
 				switch (true) {
 					case (request._type === DISPATCH):
 						let action = Object.assign({}, request._data, {sender});
 
 						this.store.dispatch(action);
-						dispatchResponder(action, sendResponse);
+						// dispatchResponder(action, sendResponse);
 						break;
 					case  (request._type === STATE):
 						sendResponse(this.store.getState());
@@ -33,7 +32,7 @@ class MainStore {
 		});
 
 		this.store.subscribe(() => {
-			webextApi.tabs.query({}, (tabs) => {
+			webextApi.tabs.query({}, (tabs: Array<any>) => {
 				for (let tab of tabs) {
 					webextApi.tabs.sendMessage(tab.id, {
 						_type: STATE,
@@ -49,24 +48,26 @@ class MainStore {
 			});
 		});
 
-		crossbrowserName === 'safari' && (window['__' + name] = this);
+		if(browserName === 'safari' ) {
+            window['__' + name] = this;
+		}
 	}
 
-	dispatch(action) {
+	dispatch = (action: Promise<any> | Object | Function) => {
 		return this.store.dispatch(action);
-	}
+	};
 
-	getState() {
+	getState = (): Object => {
 		return this.store.getState();
-	}
+	};
 
-	replaceReducer(newReducer) {
+	replaceReducer = (newReducer: Function) => {
 		return this.store.replaceReducer(newReducer);
-	}
+	};
 
-	subscribe(observer) {
+	subscribe = (observer: Function): Function => {
 		return this.store.subscribe(observer);
-	}
+	};
 }
 
 export default MainStore;
