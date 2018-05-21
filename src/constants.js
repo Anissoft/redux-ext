@@ -21,7 +21,7 @@ export let { webextApi, browserName } = (() => {
 		browserName = 'safari';
 	} else if (navigator.userAgent.indexOf("Firefox") !== -1) {//FIREFOX
 		browserName = 'firefox';
-		webextApi =  window.browser;
+		webextApi =  window.browser || browser;
 	} else if ((navigator.userAgent.indexOf("MSIE") !== -1 ) || (!!document.documentMode === true )) { //IF IE > 10
 		browserName = 'ie';
 	} else {
